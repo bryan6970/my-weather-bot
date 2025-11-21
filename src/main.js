@@ -50,11 +50,7 @@ async function main() {
             body_msg: `Rain expected at home soon. Forecast: ${homeForecast}`
         });
     }
-    else 
-        await sendNotification({
-            title: "Home Weather Alert",
-            body_msg: `test`
-        });
+   
 }
 
 await main();
