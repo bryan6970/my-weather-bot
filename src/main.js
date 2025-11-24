@@ -1,5 +1,7 @@
 import { sendNotification } from "./notify.js";
 import { get2HourForecast, getDailyForecast } from "./weather.js";
+import { loadState, saveState } from "./state.js";
+
 import 'dotenv/config';
 
 // Will be called once an hour
@@ -11,6 +13,8 @@ async function main() {
 
     const now = new Date();
     const dayOfWeek = now.getDay(); // 0=Sun,1=Mon,etc.
+
+    const state = loadState();
 
     // Forecast for office tomorrow morning at 8:30am
     if (now.getHours() >= 20 && now.getHours() < 21 && dayOfWeek < 5) { 
@@ -41,15 +45,26 @@ async function main() {
         }
     }
 
-    // // Forecast for home
-    // const homeForecast = String(await get2HourForecast(HOME_LOCATION)).toLowerCase();
+    // Forecast for home
+    const homeForecast = String(await get2HourForecast(HOME_LOCATION)).toLowerCase();
 
-    // if (homeForecast.includes("showers") || homeForecast.includes("rain")) {
-    //     await sendNotification({
-    //         title: "Rain soon",
-    //         body_msg: `Forecast: ${homeForecast}`
-    //     });
-    // }
+
+    if (homeForecast.includes("rain") || homeForecast.includes("showers") ) {
+        // Reset memory to 0 hours
+        state.hoursSinceRain = 0;
+    } else {
+        // Increment hours since last rain
+        state.hoursSinceRain += 1;
+    }
+
+    // Only notify if it's raining AND last rain was > 2 hours ago
+    if (homeForecast.includes("showers")  && state.hoursSinceRain > 2) {
+        await sendNotification({
+            title: "Rain soon",
+            body_msg: `Forecast: ${homeForecast}`
+        });
+    }
+
    
 }
 

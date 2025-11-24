@@ -2,16 +2,23 @@ name: Weather Bot
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 * * * *"   # run hourly
   workflow_dispatch:
 
 jobs:
-  run:
+  run_bot:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write     # REQUIRED to commit state.json
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+
+      - name: Setup Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Setup Node
         uses: actions/setup-node@v3
@@ -27,9 +34,13 @@ jobs:
           HOME_LOCATION: ${{ secrets.HOME_LOCATION }}
           HOME_REGION: ${{ secrets.HOME_REGION }}
           OFFICE_LOCATION: ${{ secrets.OFFICE_LOCATION }}
-          OFFICE_REGION : ${{ secrets.OFFICE_REGION }}
-
-
-
-
+          OFFICE_REGION: ${{ secrets.OFFICE_REGION }}
         run: node src/main.js
+
+      - name: Commit updated state.json
+        run: |
+          if [[ `git status --porcelain` ]]; then
+            git add state.json
+            git commit -m "Update weather memory"
+            git push
+          fi
