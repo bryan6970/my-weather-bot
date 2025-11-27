@@ -11,18 +11,19 @@ async function main() {
     const OFFICE_LOCATION = process.env.OFFICE_LOCATION;
     const OFFICE_REGION = process.env.OFFICE_REGION;
 
-    const now = new Date();
-    const dayOfWeek = now.getDay(); // 0=Sun,1=Mon,etc.
+    const local = new Date();
+    const nowSG = new Date(local.getTime() + local.getTimezoneOffset() * 60000 + 8 * 60 * 60000);
+    const dayOfWeek = nowSG.getDay(); // 0=Sun,1=Mon,etc.
 
-    console.log(`Time: ${now.getHours()}, Day: ${now.getDay()}`)
+    console.log(`Time: ${nowSG.getHours()}, Day: ${nowSG.getDay()}`)
 
     const state = loadState();
 
     
 
     // Forecast for office tomorrow morning at 8:30am
-    if (now.getHours() >= 20 && now.getHours() < 21 && dayOfWeek < 5) { 
-        const tomorrow = new Date(now);
+    if (nowSG.getHours() >= 20 && nowSG.getHours() < 21 && dayOfWeek < 5) { 
+        const tomorrow = new Date(nowSG);
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setHours(8, 30, 0, 0);
 
@@ -39,7 +40,7 @@ async function main() {
     }
 
     // Forecast for office later today (6:40am - 7:40am)
-    if (now.getHours() == 6 || now.getHours() == 7) {
+    if (nowSG.getHours() == 6 || nowSG.getHours() == 7) {
         const forecast = String(await get2HourForecast(OFFICE_LOCATION)).toLowerCase();
 
         if (forecast.includes("showers") || forecast.includes("rain")) {
@@ -52,7 +53,7 @@ async function main() {
 
     // Forecast for home
     // Send notification from 7 - 11
-    if (now.getHours() >= 7 && now.getHours() < 23){
+    if (nowSG.getHours() >= 7 && nowSG.getHours() < 23){
         const homeForecast = String(await get2HourForecast(HOME_LOCATION)).toLowerCase();
         if (homeForecast.includes("rain") || homeForecast.includes("showers") ) {
             // Reset memory to 0 hours
