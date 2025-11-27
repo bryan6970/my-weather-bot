@@ -14,6 +14,8 @@ async function main() {
     const now = new Date();
     const dayOfWeek = now.getDay(); // 0=Sun,1=Mon,etc.
 
+    console.log(`Time: ${now.getHours()}, Day: ${now.getDay()}`)
+
     const state = loadState();
 
     
