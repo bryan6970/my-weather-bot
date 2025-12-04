@@ -72,6 +72,8 @@ async function main() {
                 token: process.env.MUM_PUSHBULLET_TOKEN
             });
         }
+        else
+            console.log(`Not sending nofication. Hours since rain: ${state.hoursSinceRain}`)
 
         // update state
         if (homeForecastLower.includes("rain") || homeForecastLower.includes("showers") ) {
