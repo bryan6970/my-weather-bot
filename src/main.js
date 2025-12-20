@@ -3,6 +3,8 @@ import { get2HourForecast, getDailyForecast } from "./weather.js";
 import { loadState, saveState } from "./state.js";
 
 import 'dotenv/config';
+const rainKeywords = ["moderate", "heavy", "thundery", "showers"];
+
 
 // Will be called once an hour
 async function main() {
@@ -56,11 +58,11 @@ async function main() {
     if (nowSG.getHours() >= 7 && nowSG.getHours() < 23){
         const homeForecast = String(await get2HourForecast(HOME_LOCATION));
         const homeForecastLower = homeForecast.toLowerCase()
+        const isRainingSoon = rainKeywords.some(word =>homeForecastLower.includes(word)
+);
        
         // Only notify if it's raining AND last rain was > 2 hours ago
-        if ((homeForecastLower.includes("moderate") || 
-            homeForecastLower.includes("heavy") ||
-            homeForecastLower.includes("thundery")) && state.hoursSinceRain >= 2) {
+        if (isRainingSoon  && state.hoursSinceRain >= 2) {
 
             await sendNotification({
                 title: "Rain soon",
@@ -73,12 +75,10 @@ async function main() {
             });
         }
         else
-            console.log(`Not sending nofication. Hours since rain: ${state.hoursSinceRain}`)
+            console.log(`Not sending notification. Hours since rain: ${state.hoursSinceRain}`)
 
         // update state
-        if (homeForecastLower.includes("moderate") || 
-            homeForecastLower.includes("heavy") ||
-            homeForecastLower.includes("thundery")){
+        if (isRainingSoon){
             // Reset memory to 0 hours
             state.hoursSinceRain = 0;
         } else {
